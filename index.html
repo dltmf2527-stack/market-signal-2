@@ -19,11 +19,6 @@
     content="yes"
   >
 
-  <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
-  >
-
   <title>분할매수 신호판</title>
 
   <style>
@@ -35,9 +30,11 @@
       --text: #e8eaed;
       --muted: #9aa1ad;
       --green: #22c55e;
-      --yellow: #eab308;
       --orange: #f97316;
       --red: #ef4444;
+      --warning-bg: #2b2416;
+      --warning-line: #6b5520;
+      --warning-text: #e7c65a;
     }
 
     * {
@@ -49,6 +46,7 @@
     body {
       background: var(--bg);
       color: var(--text);
+
       font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -79,17 +77,18 @@
     }
 
     #signal {
+      background: var(--card);
       border: 1px solid var(--line);
       border-radius: 18px;
-      padding: 26px 20px;
+
       text-align: center;
-      background: var(--card);
+      padding: 26px 20px;
       margin-bottom: 14px;
     }
 
     #signal.go {
-      border-color: var(--red);
       background: #24191d;
+      border-color: var(--red);
     }
 
     .signalEmoji {
@@ -112,27 +111,28 @@
       color: var(--muted);
       font-size: 12px;
       text-align: left;
+
       display: inline-block;
       margin-top: 12px;
     }
 
-    #warningBox {
-      margin-bottom: 12px;
-    }
-
     .warning {
-      background: #2b2416;
-      border: 1px solid #6b5520;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-line);
       border-radius: 12px;
-      padding: 12px 14px;
-      color: #e7c65a;
+
+      color: var(--warning-text);
       font-size: 12px;
+
+      padding: 12px 14px;
+      margin-bottom: 12px;
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 14px;
+
       padding: 15px;
       margin-bottom: 10px;
 
@@ -169,9 +169,11 @@
     table {
       width: 100%;
       border-collapse: collapse;
+
       background: var(--card);
       border-radius: 14px;
       overflow: hidden;
+
       margin: 14px 0;
       font-size: 12px;
     }
@@ -179,7 +181,7 @@
     th,
     td {
       border-top: 1px solid var(--line);
-      padding: 10px 6px;
+      padding: 10px 5px;
       text-align: center;
     }
 
@@ -195,13 +197,16 @@
 
     button {
       width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 13px;
-      margin-bottom: 10px;
 
       background: var(--card2);
       color: var(--text);
+
+      border: 1px solid var(--line);
+      border-radius: 12px;
+
+      padding: 13px;
+      margin-bottom: 10px;
+
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
@@ -215,6 +220,7 @@
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 14px;
+
       padding: 15px;
       margin-bottom: 12px;
 
@@ -243,21 +249,32 @@
   </style>
 </head>
 
+
 <body>
 
   <header>
     <h1>📊 분할매수 신호판</h1>
-    <p>CNN 공포탐욕지수 실시간 조회 · VIX 및 나스닥 자동 갱신</p>
+
+    <p>
+      CNN 공포탐욕 최신 조회 · VIX 및 나스닥 자동 갱신
+    </p>
   </header>
+
 
   <section id="signal">
     <div class="signalEmoji">⏳</div>
-    <div class="signalTitle">최신 지표 불러오는 중…</div>
+
+    <div class="signalTitle">
+      시장 데이터 불러오는 중…
+    </div>
   </section>
+
 
   <div id="warningBox"></div>
 
+
   <section id="cards"></section>
+
 
   <table>
     <thead>
@@ -273,17 +290,24 @@
     <tbody id="ruleTable"></tbody>
   </table>
 
+
   <button onclick="loadDashboard()">
     🔄 CNN 최신값 새로고침
   </button>
 
+
   <div class="note">
     <b>📱 홈 화면 추가</b>
+
     <br>
+
     아이폰: 사파리 → 공유 → 홈 화면에 추가
+
     <br>
+
     안드로이드: 크롬 → 메뉴 → 홈 화면에 추가
   </div>
+
 
   <div class="note">
     <b>⚠️ 기계적 투입 원칙</b>
@@ -291,7 +315,7 @@
     <ol>
       <li>대기현금을 미리 확보합니다.</li>
       <li>한 번에 전부 투입하지 않습니다.</li>
-      <li>신호가 발생하면 정해둔 금액만 투입합니다.</li>
+      <li>신호 발생 시 정해둔 금액만 투입합니다.</li>
       <li>폭락 중에 기준을 변경하지 않습니다.</li>
     </ol>
 
@@ -300,16 +324,11 @@
     이 페이지는 투자 권유가 아닌 지표 확인 도구입니다.
   </div>
 
+
   <div id="status">—</div>
 
 
   <script>
-    /*
-      =========================================================
-      분할매수 규칙
-      =========================================================
-    */
-
     const RULES = [
       {
         step: 1,
@@ -346,15 +365,10 @@
     ];
 
 
-    /*
-      =========================================================
-      기본 함수
-      =========================================================
-    */
-
     function element(id) {
       return document.getElementById(id);
     }
+
 
     function formatNumber(value) {
       if (
@@ -370,6 +384,7 @@
       ).toLocaleString("ko-KR");
     }
 
+
     function roundOne(value) {
       return Math.round(
         Number(value) * 10
@@ -377,5 +392,97 @@
     }
 
 
-    /*
-      ===========================================
+    async function fetchWithTimeout(
+      url,
+      options,
+      timeoutMs
+    ) {
+      const controller =
+        new AbortController();
+
+      const timer =
+        setTimeout(
+          function () {
+            controller.abort();
+          },
+          timeoutMs
+        );
+
+      try {
+        return await fetch(
+          url,
+          {
+            ...options,
+            signal: controller.signal
+          }
+        );
+
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+
+    function parseFearGreed(data) {
+      const fng =
+        data.fear_and_greed;
+
+      if (
+        !fng ||
+        fng.score === null ||
+        fng.score === undefined
+      ) {
+        throw new Error(
+          "CNN 응답에 score가 없습니다."
+        );
+      }
+
+      return {
+        score:
+          roundOne(fng.score),
+
+        rating:
+          fng.rating || "",
+
+        previousClose:
+          fng.previous_close !== undefined
+            ? roundOne(fng.previous_close)
+            : null,
+
+        week:
+          fng.previous_1_week !== undefined
+            ? roundOne(fng.previous_1_week)
+            : null,
+
+        month:
+          fng.previous_1_month !== undefined
+            ? roundOne(fng.previous_1_month)
+            : null,
+
+        year:
+          fng.previous_1_year !== undefined
+            ? roundOne(fng.previous_1_year)
+            : null,
+
+        cnnTimestamp:
+          fng.timestamp || null,
+
+        source:
+          "CNN 최신값",
+
+        stale:
+          false
+      };
+    }
+
+
+    async function fetchLiveFearGreed() {
+      const cnnUrl =
+        "https://production.dataviz.cnn.io/" +
+        "index/fearandgreed/graphdata" +
+        "?t=" +
+        Date.now();
+
+      const proxyUrl =
+        "https://api.allorigins.win/raw?url=" +
+    
