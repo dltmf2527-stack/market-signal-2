@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
 
   <meta
     name="viewport"
@@ -14,36 +14,30 @@
     content="#0f1115"
   >
 
-  <meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
-  >
-
   <title>분할매수 신호판</title>
 
   <style>
     :root {
       --bg: #0f1115;
       --card: #181b22;
-      --card2: #1f232c;
       --line: #2a2f3a;
       --text: #e8eaed;
       --muted: #9aa1ad;
       --green: #22c55e;
       --orange: #f97316;
       --red: #ef4444;
-      --warning-bg: #2b2416;
-      --warning-line: #6b5520;
-      --warning-text: #e7c65a;
+      --warn: #e7c65a;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 18px;
+
       background: var(--bg);
       color: var(--text);
 
@@ -54,107 +48,87 @@
         "Malgun Gothic",
         sans-serif;
 
-      max-width: 650px;
-      margin: 0 auto;
-      padding: 16px;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     header {
       text-align: center;
-      padding: 16px 0 22px;
+      padding: 8px 0 22px;
     }
 
-    header h1 {
-      font-size: 22px;
-      font-weight: 800;
+    h1 {
+      font-size: 23px;
+      margin: 0;
     }
 
     header p {
-      color: var(--muted);
       font-size: 12px;
-      margin-top: 5px;
+      color: var(--muted);
+      margin: 5px 0 0;
     }
 
-    #signal {
+    .panel,
+    .card,
+    .note,
+    .warning {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 15px;
+    }
 
+    .panel {
+      padding: 25px;
       text-align: center;
-      padding: 26px 20px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
-    #signal.go {
-      background: #24191d;
+    .panel.go {
       border-color: var(--red);
+      background: #24191d;
     }
 
-    .signalEmoji {
+    .emoji {
       font-size: 42px;
     }
 
-    .signalTitle {
+    .title {
       font-size: 21px;
       font-weight: 800;
       margin-top: 8px;
     }
 
-    .signalSub {
-      color: var(--muted);
+    .sub,
+    .small {
       font-size: 12px;
-      margin-top: 7px;
+      color: var(--muted);
+      margin-top: 6px;
     }
 
-    .signalReason {
-      color: var(--muted);
-      font-size: 12px;
-      text-align: left;
-
+    .reasons {
       display: inline-block;
+      text-align: left;
       margin-top: 12px;
     }
 
     .warning {
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-line);
-      border-radius: 12px;
-
-      color: var(--warning-text);
-      font-size: 12px;
-
       padding: 12px 14px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      color: var(--warn);
+      font-size: 12px;
     }
 
     .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-
-      padding: 15px;
-      margin-bottom: 10px;
-
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 12px;
+
+      padding: 14px;
+      margin-bottom: 9px;
     }
 
-    .cardTitle {
-      font-size: 15px;
-    }
-
-    .cardSub {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 3px;
-    }
-
-    .cardValue {
-      font-size: 23px;
-      font-weight: 800;
+    .card strong {
+      font-size: 24px;
       white-space: nowrap;
     }
 
@@ -174,7 +148,7 @@
       border-radius: 14px;
       overflow: hidden;
 
-      margin: 14px 0;
+      margin: 13px 0;
       font-size: 12px;
     }
 
@@ -187,7 +161,6 @@
 
     th {
       color: var(--muted);
-      font-weight: 600;
     }
 
     tr.hit {
@@ -198,31 +171,23 @@
     button {
       width: 100%;
 
-      background: var(--card2);
-      color: var(--text);
+      padding: 13px;
+      margin-bottom: 10px;
 
       border: 1px solid var(--line);
       border-radius: 12px;
 
-      padding: 13px;
-      margin-bottom: 10px;
+      background: #20242d;
+      color: var(--text);
 
-      font-size: 14px;
       font-weight: 700;
+      font-size: 14px;
       cursor: pointer;
     }
 
-    button:active {
-      opacity: 0.7;
-    }
-
     .note {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-
-      padding: 15px;
-      margin-bottom: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
 
       color: var(--muted);
       font-size: 12px;
@@ -232,19 +197,11 @@
       color: var(--text);
     }
 
-    .note ol {
-      margin: 8px 0 0 18px;
-    }
-
-    .note li {
-      margin: 5px 0;
-    }
-
     #status {
+      text-align: center;
       color: var(--muted);
       font-size: 11px;
-      text-align: center;
-      padding: 8px 0 24px;
+      padding: 8px 0 20px;
     }
   </style>
 </head>
@@ -261,16 +218,21 @@
   </header>
 
 
-  <section id="signal">
-    <div class="signalEmoji">⏳</div>
+  <section
+    id="signal"
+    class="panel"
+  >
+    <div class="emoji">
+      ⏳
+    </div>
 
-    <div class="signalTitle">
+    <div class="title">
       시장 데이터 불러오는 중…
     </div>
   </section>
 
 
-  <div id="warningBox"></div>
+  <div id="warning"></div>
 
 
   <section id="cards"></section>
@@ -287,11 +249,14 @@
       </tr>
     </thead>
 
-    <tbody id="ruleTable"></tbody>
+    <tbody id="rules"></tbody>
   </table>
 
 
-  <button onclick="loadDashboard()">
+  <button
+    id="refresh"
+    type="button"
+  >
     🔄 CNN 최신값 새로고침
   </button>
 
@@ -312,177 +277,32 @@
   <div class="note">
     <b>⚠️ 기계적 투입 원칙</b>
 
-    <ol>
-      <li>대기현금을 미리 확보합니다.</li>
-      <li>한 번에 전부 투입하지 않습니다.</li>
-      <li>신호 발생 시 정해둔 금액만 투입합니다.</li>
-      <li>폭락 중에 기준을 변경하지 않습니다.</li>
-    </ol>
+    <br>
+
+    1. 대기현금을 미리 확보합니다.
 
     <br>
 
-    이 페이지는 투자 권유가 아닌 지표 확인 도구입니다.
+    2. 한 번에 전부 투입하지 않습니다.
+
+    <br>
+
+    3. 신호 발생 시 정해둔 금액만 투입합니다.
+
+    <br>
+
+    4. 폭락 중 기준을 변경하지 않습니다.
+
+    <br><br>
+
+    투자 권유가 아닌 지표 확인 도구입니다.
   </div>
 
 
-  <div id="status">—</div>
+  <div id="status">
+    스크립트 시작 전
+  </div>
 
 
   <script>
-    const RULES = [
-      {
-        step: 1,
-        label: "1단계 진입",
-        deploy: "대기현금의 25%",
-        fng: 25,
-        vix: null,
-        drawdown: -15
-      },
-      {
-        step: 2,
-        label: "2단계 진입",
-        deploy: "대기현금의 25%",
-        fng: 15,
-        vix: 30,
-        drawdown: -25
-      },
-      {
-        step: 3,
-        label: "3단계 진입",
-        deploy: "대기현금의 25%",
-        fng: 10,
-        vix: 35,
-        drawdown: -35
-      },
-      {
-        step: 4,
-        label: "4단계 전량투입",
-        deploy: "남은 대기현금 전부",
-        fng: null,
-        vix: 50,
-        drawdown: -45
-      }
-    ];
-
-
-    function element(id) {
-      return document.getElementById(id);
-    }
-
-
-    function formatNumber(value) {
-      if (
-        value === null ||
-        value === undefined ||
-        Number.isNaN(Number(value))
-      ) {
-        return "–";
-      }
-
-      return Math.round(
-        Number(value)
-      ).toLocaleString("ko-KR");
-    }
-
-
-    function roundOne(value) {
-      return Math.round(
-        Number(value) * 10
-      ) / 10;
-    }
-
-
-    async function fetchWithTimeout(
-      url,
-      options,
-      timeoutMs
-    ) {
-      const controller =
-        new AbortController();
-
-      const timer =
-        setTimeout(
-          function () {
-            controller.abort();
-          },
-          timeoutMs
-        );
-
-      try {
-        return await fetch(
-          url,
-          {
-            ...options,
-            signal: controller.signal
-          }
-        );
-
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-
-    function parseFearGreed(data) {
-      const fng =
-        data.fear_and_greed;
-
-      if (
-        !fng ||
-        fng.score === null ||
-        fng.score === undefined
-      ) {
-        throw new Error(
-          "CNN 응답에 score가 없습니다."
-        );
-      }
-
-      return {
-        score:
-          roundOne(fng.score),
-
-        rating:
-          fng.rating || "",
-
-        previousClose:
-          fng.previous_close !== undefined
-            ? roundOne(fng.previous_close)
-            : null,
-
-        week:
-          fng.previous_1_week !== undefined
-            ? roundOne(fng.previous_1_week)
-            : null,
-
-        month:
-          fng.previous_1_month !== undefined
-            ? roundOne(fng.previous_1_month)
-            : null,
-
-        year:
-          fng.previous_1_year !== undefined
-            ? roundOne(fng.previous_1_year)
-            : null,
-
-        cnnTimestamp:
-          fng.timestamp || null,
-
-        source:
-          "CNN 최신값",
-
-        stale:
-          false
-      };
-    }
-
-
-    async function fetchLiveFearGreed() {
-      const cnnUrl =
-        "https://production.dataviz.cnn.io/" +
-        "index/fearandgreed/graphdata" +
-        "?t=" +
-        Date.now();
-
-      const proxyUrl =
-        "https://api.allorigins.win/raw?url=" +
-    
+    const RULES = 
