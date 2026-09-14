@@ -25,22 +25,16 @@ HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
     "Referer": "https://edition.cnn.com/",
-    "Origin": "https://edition.cnn.com",
     "Cache-Control": "no-cache",
     "Pragma": "no-cache",
 }
 
 
 # ============================================================
-# 공통 요청 함수
+# 공통 JSON 요청
 # ============================================================
 
 def get_json(url, timeout=40):
-    """
-    URL에서 JSON 데이터를 읽습니다.
-    HTTP 오류가 발생하면 호출한 함수로 오류를 전달합니다.
-    """
-
     request = urllib.request.Request(
         url=url,
         headers=HEADERS,
@@ -64,11 +58,6 @@ def get_json(url, timeout=40):
 # ============================================================
 
 def load_previous_data():
-    """
-    일시적인 외부 API 오류가 발생했을 때
-    마지막 정상값을 유지하기 위해 기존 data.json을 읽습니다.
-    """
-
     try:
         with open(
             "data.json",
@@ -86,23 +75,19 @@ def load_previous_data():
 # ============================================================
 
 def parse_fng_response(data):
-    """
-    CNN 응답에서 필요한 공포탐욕지수 값만 추출합니다.
-    """
-
     fng = data.get("fear_and_greed")
 
     if not isinstance(fng, dict):
         raise ValueError(
-            "CNN 응답에 fear_and_greed 항목이 없습니다."
+            "CNN 응답에 fear_and_greed가 없습니다."
         )
 
     if fng.get("score") is None:
         raise ValueError(
-            "CNN 응답에 score 값이 없습니다."
+            "CNN 응답에 score가 없습니다."
         )
 
-    return {
+    result = {
         "score": round(
             float(fng["score"]),
             1,
@@ -110,59 +95,49 @@ def parse_fng_response(data):
         "rating": str(
             fng.get("rating", "")
         ),
-        "previousClose": (
-            round(
-                float(fng["previous_close"]),
-                1,
-            )
-            if fng.get("previous_close") is not None
-            else None
-        ),
-        "week": (
-            round(
-                float(fng["previous_1_week"]),
-                1,
-            )
-            if fng.get("previous_1_week") is not None
-            else None
-        ),
-        "month": (
-            round(
-                float(fng["previous_1_month"]),
-                1,
-            )
-            if fng.get("previous_1_month") is not None
-            else None
-        ),
-        "year": (
-            round(
-                float(fng["previous_1_year"]),
-                1,
-            )
-            if fng.get("previous_1_year") is not None
-            else None
-        ),
+        "previousClose": None,
+        "week": None,
+        "month": None,
+        "year": None,
         "cnnTimestamp": fng.get("timestamp"),
         "source": "CNN Fear & Greed Index",
         "stale": False,
     }
 
+    if fng.get("previous_close") is not None:
+        result["previousClose"] = round(
+            float(fng["previous_close"]),
+            1,
+        )
+
+    if fng.get("previous_1_week") is not None:
+        result["week"] = round(
+            float(fng["previous_1_week"]),
+            1,
+        )
+
+    if fng.get("previous_1_month") is not None:
+        result["month"] = round(
+            float(fng["previous_1_month"]),
+            1,
+        )
+
+    if fng.get("previous_1_year") is not None:
+        result["year"] = round(
+            float(fng["previous_1_year"]),
+            1,
+        )
+
+    return result
+
 
 def fetch_fng():
-    """
-    CNN 공식 주소에 최신 공포탐욕지수를 요청합니다.
-
-    1. CNN 공식 주소에 직접 요청
-    2. 실패하면 AllOrigins raw 경로로 요청
-    3. 각 경로를 최대 3번 재시도
-    """
-
-    cache_buster = int(time.time())
+    cache_buster = str(int(time.time()))
 
     direct_url = (
         CNN_FNG_URL
         + "?t="
-        + str(cache_buster)
+        + cache_buster
     )
 
     proxy_url = (
@@ -178,57 +153,47 @@ def fetch_fng():
         proxy_url,
     ]
 
-    error_messages = []
+    errors = []
 
-    for url_number, url in enumerate(
+    for route_number, url in enumerate(
         urls,
         start=1,
     ):
         for attempt in range(1, 4):
             try:
-                data = get_json(
+                response_data = get_json(
                     url,
                     timeout=40,
                 )
 
-                return parse_fng_response(data)
+                return parse_fng_response(
+                    response_data
+                )
 
             except Exception as error:
-                error_messages.append(
+                errors.append(
                     "경로 "
-                    + str(url_number)
-                    + ", 시도 "
+                    + str(route_number)
+                    + " / 시도 "
                     + str(attempt)
-                    + ": "
+                    + " / "
                     + repr(error)
                 )
 
                 if attempt < 3:
-                    time.sleep(
-                        attempt * 4
-                    )
+                    time.sleep(attempt * 3)
 
     raise RuntimeError(
-        "CNN 공포탐욕지수 조회 실패 | "
-        + " | ".join(error_messages)
+        "CNN 조회 실패: "
+        + " | ".join(errors)
     )
 
 
 # ============================================================
-# 네이버 금융 VIX 및 나스닥100
+# 네이버 금융 VIX와 나스닥100
 # ============================================================
 
-def fetch_closes(symbol, required_days=300):
-    """
-    네이버 금융에서 지수 일별 종가를 가져옵니다.
-
-    네이버 API에서 검증된 형식:
-    pageSize=10&page=1
-
-    한 페이지당 10일이므로
-    30페이지를 조회해 최대 약 300개 값을 수집합니다.
-    """
-
+def fetch_closes(symbol):
     closes = []
 
     for page in range(1, 31):
@@ -248,19 +213,19 @@ def fetch_closes(symbol, required_days=300):
         if not isinstance(rows, list):
             raise ValueError(
                 symbol
-                + " 응답이 리스트 형식이 아닙니다."
+                + " 응답이 리스트가 아닙니다."
             )
 
-        if not rows:
+        if len(rows) == 0:
             break
 
         for row in rows:
             close_price = row.get("closePrice")
 
-            if close_price in (
-                None,
-                "",
-            ):
+            if close_price is None:
+                continue
+
+            if close_price == "":
                 continue
 
             try:
@@ -278,7 +243,7 @@ def fetch_closes(symbol, required_days=300):
 
         time.sleep(0.3)
 
-    if len(closes) < 210:
+    if len(closes) < 252:
         raise ValueError(
             symbol
             + " 데이터 부족: "
@@ -286,14 +251,9 @@ def fetch_closes(symbol, required_days=300):
             + "개"
         )
 
-    /*
-    네이버 응답은 최신 날짜부터 과거 날짜 순서입니다.
-    계산을 위해 과거부터 최신 순서로 뒤집습니다.
-    */
+    # 네이버 응답은 최신 날짜부터 과거 날짜 순서입니다.
+    # 계산을 위해 과거부터 최신 날짜 순서로 뒤집습니다.
     closes.reverse()
-
-    if len(closes) > required_days:
-        closes = closes[-required_days:]
 
     return closes
 
@@ -308,7 +268,7 @@ def main():
     previous = load_previous_data()
 
     # --------------------------------------------------------
-    # 1. CNN 공포탐욕지수
+    # CNN 공포탐욕지수
     # --------------------------------------------------------
 
     try:
@@ -320,10 +280,11 @@ def main():
         if isinstance(previous_fng, dict):
             fng = dict(previous_fng)
             fng["stale"] = True
+            fng["source"] = "직전 CNN 정상값"
 
             errors.append(
                 "공포탐욕지수 최신 조회 실패. "
-                "직전 정상값 표시 중: "
+                "직전 정상값 사용: "
                 + repr(error)
             )
 
@@ -336,7 +297,7 @@ def main():
             )
 
     # --------------------------------------------------------
-    # 2. VIX
+    # VIX
     # --------------------------------------------------------
 
     try:
@@ -350,18 +311,21 @@ def main():
     except Exception as error:
         vix = previous.get("vix")
 
-        errors.append(
-            "VIX 최신 조회 실패"
-            + (
-                ". 직전 정상값 표시 중: "
-                if vix is not None
-                else ": "
+        if vix is not None:
+            errors.append(
+                "VIX 최신 조회 실패. "
+                "직전 정상값 사용: "
+                + repr(error)
             )
-            + repr(error)
-        )
+
+        else:
+            errors.append(
+                "VIX 조회 실패: "
+                + repr(error)
+            )
 
     # --------------------------------------------------------
-    # 3. 나스닥100
+    # 나스닥100
     # --------------------------------------------------------
 
     try:
@@ -405,4 +369,69 @@ def main():
                     - 1
                 )
                 * 100,
-        
+                2,
+            ),
+            "days": len(ndx_closes),
+        }
+
+    except Exception as error:
+        ndx = previous.get("ndx")
+
+        if ndx is not None:
+            errors.append(
+                "나스닥100 최신 조회 실패. "
+                "직전 정상값 사용: "
+                + repr(error)
+            )
+
+        else:
+            errors.append(
+                "나스닥100 조회 실패: "
+                + repr(error)
+            )
+
+    # --------------------------------------------------------
+    # data.json 저장
+    # --------------------------------------------------------
+
+    now = datetime.now(KST)
+
+    output = {
+        "updatedAt": now.isoformat(
+            timespec="seconds"
+        ),
+        "updatedLabel": (
+            now.strftime(
+                "%Y년 %m월 %d일 %H:%M"
+            )
+            + " (한국시각)"
+        ),
+        "fng": fng,
+        "vix": vix,
+        "ndx": ndx,
+        "errors": errors,
+    }
+
+    with open(
+        "data.json",
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            output,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    print(
+        json.dumps(
+            output,
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
