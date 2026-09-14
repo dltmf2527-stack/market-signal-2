@@ -1,215 +1,530 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>분할매수 신호판</title>
 
-  <title>분할매수 신호판</title>
+<style>
+body{
+  max-width:650px;
+  margin:auto;
+  padding:18px;
+  background:#0f1115;
+  color:#e8eaed;
+  font-family:Arial,"Malgun Gothic";
+  line-height:1.5;
+}
 
-  <style>
-    body {
-      max-width: 650px;
-      margin: 0 auto;
-      padding: 18px;
+h1{
+  text-align:center;
+  font-size:23px;
+}
 
-      background: #0f1115;
-      color: #e8eaed;
+.box,
+.card,
+table,
+button{
+  background:#181b22;
+  border:1px solid #2a2f3a;
+  border-radius:14px;
+}
 
-      font-family:
-        Arial,
-        "Malgun Gothic",
-        sans-serif;
+.box{
+  text-align:center;
+  padding:24px;
+  margin:18px 0;
+}
 
-      line-height: 1.6;
-    }
+.big{
+  font-size:21px;
+  font-weight:bold;
+}
 
-    header {
-      text-align: center;
-      padding: 10px 0 22px;
-    }
+.card{
+  display:flex;
+  justify-content:space-between;
+  padding:14px;
+  margin:9px 0;
+}
 
-    h1 {
-      margin: 0;
-      font-size: 23px;
-    }
+.card b{
+  font-size:23px;
+}
 
-    header p {
-      margin: 5px 0 0;
-      color: #9aa1ad;
-      font-size: 12px;
-    }
+.small,
+#status{
+  font-size:12px;
+  color:#9aa1ad;
+}
 
-    #signal {
-      margin-bottom: 12px;
-      padding: 25px;
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:13px 0;
+  font-size:12px;
+  overflow:hidden;
+}
 
-      background: #181b22;
-      border: 1px solid #2a2f3a;
-      border-radius: 16px;
+th,
+td{
+  padding:10px 5px;
+  border-top:1px solid #2a2f3a;
+  text-align:center;
+}
 
-      text-align: center;
-    }
+th{
+  color:#9aa1ad;
+}
 
-    #signal.go {
-      background: #24191d;
-      border-color: #ef4444;
-    }
+button{
+  width:100%;
+  padding:13px;
+  color:#e8eaed;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    .emoji {
-      font-size: 42px;
-    }
+.hit{
+  background:#3a1f24;
+}
 
-    .title {
-      margin-top: 7px;
-      font-size: 21px;
-      font-weight: bold;
-    }
+.go{
+  border-color:#ef4444;
+  background:#24191d;
+}
 
-    .sub {
-      margin-top: 6px;
-      color: #9aa1ad;
-      font-size: 12px;
-    }
-
-    .reason {
-      display: inline-block;
-      margin-top: 12px;
-
-      color: #9aa1ad;
-      font-size: 12px;
-      text-align: left;
-    }
-
-    .card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      margin-bottom: 9px;
-      padding: 14px;
-
-      background: #181b22;
-      border: 1px solid #2a2f3a;
-      border-radius: 14px;
-    }
-
-    .card-label {
-      font-size: 15px;
-    }
-
-    .card-sub {
-      margin-top: 3px;
-      color: #9aa1ad;
-      font-size: 11px;
-    }
-
-    .card-value {
-      font-size: 24px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .source {
-      color: #22c55e;
-    }
-
-    table {
-      width: 100%;
-      margin: 13px 0;
-
-      background: #181b22;
-      border-collapse: collapse;
-      border-radius: 14px;
-      overflow: hidden;
-
-      font-size: 12px;
-    }
-
-    th,
-    td {
-      padding: 10px 5px;
-      border-top: 1px solid #2a2f3a;
-      text-align: center;
-    }
-
-    th {
-      color: #9aa1ad;
-    }
-
-    tr.hit {
-      background: #3a1f24;
-      font-weight: bold;
-    }
-
-    button {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 13px;
-
-      background: #20242d;
-      color: #e8eaed;
-
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .note {
-      margin-bottom: 10px;
-      padding: 14px;
-
-      background: #181b22;
-      border: 1px solid #2a2f3a;
-      border-radius: 14px;
-
-      color: #9aa1ad;
-      font-size: 12px;
-    }
-
-    .note b {
-      color: #e8eaed;
-    }
-
-    #error {
-      display: none;
-
-      margin-bottom: 10px;
-      padding: 12px;
-
-      background: #2b2416;
-      color: #e7c65a;
-
-      border: 1px solid #6b5520;
-      border-radius: 12px;
-
-      font-size: 12px;
-    }
-
-    #status {
-      padding: 8px 0 20px;
-      color: #9aa1ad;
-      font-size: 11px;
-      text-align: center;
-    }
-  </style>
+#status{
+  text-align:center;
+  margin:12px;
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <h1>📊 분할매수 신호판</h1>
+<h1>📊 분할매수 신호판</h1>
 
-    <p>
-      CNN 공포탐욕 · VIX · 나스닥100 자동 갱신
-    </p>
-  </header>
+<div id="signal" class="box">
+  <div style="font-size:42px">⏳</div>
+  <div class="big">데이터 불러오는 중</div>
+</div>
+
+<div id="cards"></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>공탐</th>
+      <th>VIX</th>
+      <th>낙폭</th>
+      <th>투입</th>
+    </tr>
+  </thead>
+
+  <tbody id="rules"></tbody>
+</table>
+
+<button id="refresh">
+  🔄 새로고침
+</button>
+
+<div id="status">
+  스크립트 준비
+</div>
 
 
-  <div id="signal">
-    <div class="emoji">⏳</
+<script>
+var R = [
+  {s:1, f:25, v:null, d:-15},
+  {s:2, f:15, v:30, d:-25},
+  {s:3, f:10, v:35, d:-35},
+  {s:4, f:null, v:50, d:-45}
+];
+
+
+function E(id){
+  return document.getElementById(id);
+}
+
+
+function N(value){
+  return Math.round(
+    Number(value)
+  ).toLocaleString("ko-KR");
+}
+
+
+function load(){
+  E("status").innerHTML =
+    "data.json 요청 중";
+
+  var request =
+    new XMLHttpRequest();
+
+  request.open(
+    "GET",
+    "data.json?t=" + new Date().getTime(),
+    true
+  );
+
+
+  request.onload = function(){
+
+    if(
+      request.status < 200 ||
+      request.status >= 300
+    ){
+      fail(
+        "HTTP " + request.status
+      );
+
+      return;
+    }
+
+
+    try{
+      var data =
+        JSON.parse(
+          request.responseText
+        );
+
+      draw(data);
+
+    }catch(error){
+      fail(
+        error.message
+      );
+    }
+  };
+
+
+  request.onerror = function(){
+    fail(
+      "네트워크 오류"
+    );
+  };
+
+
+  request.send();
+}
+
+
+function fail(message){
+  E("signal").innerHTML =
+    '<div style="font-size:42px">😵</div>' +
+    '<div class="big">데이터 오류</div>' +
+    '<div class="small">' +
+    message +
+    '</div>';
+
+  E("status").innerHTML =
+    "실패";
+}
+
+
+function draw(data){
+  var fng =
+    data.fng
+      ? Number(data.fng.score)
+      : null;
+
+  var vix =
+    data.vix == null
+      ? null
+      : Number(data.vix);
+
+  var ndx =
+    data.ndx;
+
+
+  if(!ndx){
+    fail(
+      "나스닥 데이터 없음"
+    );
+
+    return;
+  }
+
+
+  var drawdown =
+    Number(ndx.drawdown);
+
+  var gap =
+    Number(ndx.maGap);
+
+  var cards =
+    "";
+
+
+  cards +=
+    '<div class="card">' +
+      '<span>' +
+        '공포탐욕지수' +
+        '<div class="small">' +
+          'CNN 자동수집값' +
+        '</div>' +
+      '</span>' +
+      '<b>' +
+        (
+          fng == null
+            ? "-"
+            : fng
+        ) +
+      '</b>' +
+    '</div>';
+
+
+  var vixLabel =
+    "수집 실패";
+
+
+  if(vix != null){
+    if(vix < 20){
+      vixLabel = "정상";
+
+    }else if(vix < 30){
+      vixLabel = "긴장";
+
+    }else if(vix < 50){
+      vixLabel = "스트레스";
+
+    }else{
+      vixLabel = "공황";
+    }
+  }
+
+
+  cards +=
+    '<div class="card">' +
+      '<span>' +
+        'VIX' +
+        '<div class="small">' +
+          vixLabel +
+        '</div>' +
+      '</span>' +
+      '<b>' +
+        (
+          vix == null
+            ? "-"
+            : vix
+        ) +
+      '</b>' +
+    '</div>';
+
+
+  cards +=
+    '<div class="card">' +
+      '<span>' +
+        '나스닥100 낙폭' +
+        '<div class="small">' +
+          '현재 ' +
+          N(ndx.last) +
+          ' / 52주 고점 ' +
+          N(ndx.high52w) +
+        '</div>' +
+      '</span>' +
+      '<b>' +
+        drawdown.toFixed(1) +
+        '%' +
+      '</b>' +
+    '</div>';
+
+
+  cards +=
+    '<div class="card">' +
+      '<span>' +
+        '200일선 대비' +
+        '<div class="small">' +
+          '200일선 ' +
+          N(ndx.ma200) +
+        '</div>' +
+      '</span>' +
+      '<b>' +
+        (
+          gap >= 0
+            ? "+"
+            : ""
+        ) +
+        gap.toFixed(1) +
+        '%' +
+      '</b>' +
+    '</div>';
+
+
+  E("cards").innerHTML =
+    cards;
+
+
+  var top =
+    null;
+
+  var rows =
+    "";
+
+  var i;
+
+
+  for(
+    i = 0;
+    i < R.length;
+    i = i + 1
+  ){
+    var rule =
+      R[i];
+
+    var reasons =
+      [];
+
+
+    if(
+      rule.f != null &&
+      fng != null &&
+      fng <= rule.f
+    ){
+      reasons.push(
+        "공탐 " +
+        fng +
+        " ≤ " +
+        rule.f
+      );
+    }
+
+
+    if(
+      rule.v != null &&
+      vix != null &&
+      vix >= rule.v
+    ){
+      reasons.push(
+        "VIX " +
+        vix +
+        " ≥ " +
+        rule.v
+      );
+    }
+
+
+    if(
+      drawdown <= rule.d
+    ){
+      reasons.push(
+        "낙폭 " +
+        drawdown.toFixed(1) +
+        "% ≤ " +
+        rule.d +
+        "%"
+      );
+    }
+
+
+    if(reasons.length){
+      top = {
+        rule:rule,
+        reasons:reasons
+      };
+    }
+
+
+    rows +=
+      '<tr class="' +
+      (
+        reasons.length
+          ? "hit"
+          : ""
+      ) +
+      '">' +
+
+        '<td>' +
+          rule.s +
+        '</td>' +
+
+        '<td>' +
+          (
+            rule.f == null
+              ? "-"
+              : rule.f + "↓"
+          ) +
+        '</td>' +
+
+        '<td>' +
+          (
+            rule.v == null
+              ? "-"
+              : rule.v + "↑"
+          ) +
+        '</td>' +
+
+        '<td>' +
+          rule.d +
+          '%' +
+        '</td>' +
+
+        '<td>' +
+          (
+            rule.s == 4
+              ? "전부"
+              : "25%"
+          ) +
+        '</td>' +
+
+      '</tr>';
+  }
+
+
+  E("rules").innerHTML =
+    rows;
+
+
+  if(top){
+    E("signal").className =
+      "box go";
+
+    E("signal").innerHTML =
+      '<div style="font-size:42px">🚨</div>' +
+
+      '<div class="big">' +
+        top.rule.s +
+        '단계 진입' +
+      '</div>' +
+
+      '<div class="small">' +
+        top.reasons.join(" / ") +
+      '</div>';
+
+  }else{
+    E("signal").className =
+      "box";
+
+    E("signal").innerHTML =
+      '<div style="font-size:42px">😴</div>' +
+
+      '<div class="big">' +
+        '대기 · 조건 미충족' +
+      '</div>' +
+
+      '<div class="small">' +
+        '평소처럼 적립만 계속' +
+      '</div>';
+  }
+
+
+  E("status").innerHTML =
+    "마지막 자동 갱신 · " +
+    (
+      data.updatedLabel ||
+      "-"
+    );
+}
+
+
+E("refresh").onclick =
+  load;
+
+
+load();
+</script>
+
+</body>
+</html>
