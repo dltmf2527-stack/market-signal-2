@@ -1,90 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-
 <head>
-  <meta charset="utf-8">
-
+  <meta charset="UTF-8">
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1"
   >
 
-  <meta
-    name="theme-color"
-    content="#0f1115"
-  >
-
   <title>분할매수 신호판</title>
 
   <style>
-    :root {
-      --bg: #0f1115;
-      --card: #181b22;
-      --line: #2a2f3a;
-      --text: #e8eaed;
-      --muted: #9aa1ad;
-      --green: #22c55e;
-      --orange: #f97316;
-      --red: #ef4444;
-      --warn: #e7c65a;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      max-width: 660px;
+      max-width: 650px;
       margin: 0 auto;
       padding: 18px;
 
-      background: var(--bg);
-      color: var(--text);
+      background: #0f1115;
+      color: #e8eaed;
 
       font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Apple SD Gothic Neo",
+        Arial,
         "Malgun Gothic",
         sans-serif;
 
-      line-height: 1.55;
+      line-height: 1.6;
     }
 
     header {
       text-align: center;
-      padding: 8px 0 22px;
+      padding: 10px 0 22px;
     }
 
     h1 {
-      font-size: 23px;
       margin: 0;
+      font-size: 23px;
     }
 
     header p {
-      font-size: 12px;
-      color: var(--muted);
       margin: 5px 0 0;
+      color: #9aa1ad;
+      font-size: 12px;
     }
 
-    .panel,
-    .card,
-    .note,
-    .warning {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 15px;
-    }
-
-    .panel {
-      padding: 25px;
-      text-align: center;
+    #signal {
       margin-bottom: 12px;
+      padding: 25px;
+
+      background: #181b22;
+      border: 1px solid #2a2f3a;
+      border-radius: 16px;
+
+      text-align: center;
     }
 
-    .panel.go {
-      border-color: var(--red);
+    #signal.go {
       background: #24191d;
+      border-color: #ef4444;
     }
 
     .emoji {
@@ -92,120 +63,142 @@
     }
 
     .title {
+      margin-top: 7px;
       font-size: 21px;
-      font-weight: 800;
-      margin-top: 8px;
+      font-weight: bold;
     }
 
-    .sub,
-    .small {
-      font-size: 12px;
-      color: var(--muted);
+    .sub {
       margin-top: 6px;
-    }
-
-    .reasons {
-      display: inline-block;
-      text-align: left;
-      margin-top: 12px;
-    }
-
-    .warning {
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      color: var(--warn);
+      color: #9aa1ad;
       font-size: 12px;
+    }
+
+    .reason {
+      display: inline-block;
+      margin-top: 12px;
+
+      color: #9aa1ad;
+      font-size: 12px;
+      text-align: left;
     }
 
     .card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
 
-      padding: 14px;
       margin-bottom: 9px;
+      padding: 14px;
+
+      background: #181b22;
+      border: 1px solid #2a2f3a;
+      border-radius: 14px;
     }
 
-    .card strong {
+    .card-label {
+      font-size: 15px;
+    }
+
+    .card-sub {
+      margin-top: 3px;
+      color: #9aa1ad;
+      font-size: 11px;
+    }
+
+    .card-value {
       font-size: 24px;
+      font-weight: bold;
       white-space: nowrap;
     }
 
-    .live {
-      color: var(--green);
-    }
-
-    .stale {
-      color: var(--orange);
+    .source {
+      color: #22c55e;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      margin: 13px 0;
 
-      background: var(--card);
+      background: #181b22;
+      border-collapse: collapse;
       border-radius: 14px;
       overflow: hidden;
 
-      margin: 13px 0;
       font-size: 12px;
     }
 
     th,
     td {
-      border-top: 1px solid var(--line);
       padding: 10px 5px;
+      border-top: 1px solid #2a2f3a;
       text-align: center;
     }
 
     th {
-      color: var(--muted);
+      color: #9aa1ad;
     }
 
     tr.hit {
       background: #3a1f24;
-      font-weight: 700;
+      font-weight: bold;
     }
 
     button {
       width: 100%;
-
-      padding: 13px;
       margin-bottom: 10px;
-
-      border: 1px solid var(--line);
-      border-radius: 12px;
+      padding: 13px;
 
       background: #20242d;
-      color: var(--text);
+      color: #e8eaed;
 
-      font-weight: 700;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+
       font-size: 14px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     .note {
-      padding: 14px;
       margin-bottom: 10px;
+      padding: 14px;
 
-      color: var(--muted);
+      background: #181b22;
+      border: 1px solid #2a2f3a;
+      border-radius: 14px;
+
+      color: #9aa1ad;
       font-size: 12px;
     }
 
     .note b {
-      color: var(--text);
+      color: #e8eaed;
+    }
+
+    #error {
+      display: none;
+
+      margin-bottom: 10px;
+      padding: 12px;
+
+      background: #2b2416;
+      color: #e7c65a;
+
+      border: 1px solid #6b5520;
+      border-radius: 12px;
+
+      font-size: 12px;
     }
 
     #status {
-      text-align: center;
-      color: var(--muted);
-      font-size: 11px;
       padding: 8px 0 20px;
+      color: #9aa1ad;
+      font-size: 11px;
+      text-align: center;
     }
   </style>
 </head>
-
 
 <body>
 
@@ -213,96 +206,10 @@
     <h1>📊 분할매수 신호판</h1>
 
     <p>
-      CNN 공포탐욕 최신 조회 · VIX 및 나스닥 자동 갱신
+      CNN 공포탐욕 · VIX · 나스닥100 자동 갱신
     </p>
   </header>
 
 
-  <section
-    id="signal"
-    class="panel"
-  >
-    <div class="emoji">
-      ⏳
-    </div>
-
-    <div class="title">
-      시장 데이터 불러오는 중…
-    </div>
-  </section>
-
-
-  <div id="warning"></div>
-
-
-  <section id="cards"></section>
-
-
-  <table>
-    <thead>
-      <tr>
-        <th>단계</th>
-        <th>공포탐욕</th>
-        <th>VIX</th>
-        <th>낙폭</th>
-        <th>투입</th>
-      </tr>
-    </thead>
-
-    <tbody id="rules"></tbody>
-  </table>
-
-
-  <button
-    id="refresh"
-    type="button"
-  >
-    🔄 CNN 최신값 새로고침
-  </button>
-
-
-  <div class="note">
-    <b>📱 홈 화면 추가</b>
-
-    <br>
-
-    아이폰: 사파리 → 공유 → 홈 화면에 추가
-
-    <br>
-
-    안드로이드: 크롬 → 메뉴 → 홈 화면에 추가
-  </div>
-
-
-  <div class="note">
-    <b>⚠️ 기계적 투입 원칙</b>
-
-    <br>
-
-    1. 대기현금을 미리 확보합니다.
-
-    <br>
-
-    2. 한 번에 전부 투입하지 않습니다.
-
-    <br>
-
-    3. 신호 발생 시 정해둔 금액만 투입합니다.
-
-    <br>
-
-    4. 폭락 중 기준을 변경하지 않습니다.
-
-    <br><br>
-
-    투자 권유가 아닌 지표 확인 도구입니다.
-  </div>
-
-
-  <div id="status">
-    스크립트 시작 전
-  </div>
-
-
-  <script>
-    const RULES = 
+  <div id="signal">
+    <div class="emoji">⏳</
