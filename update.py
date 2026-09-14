@@ -71,7 +71,7 @@ def load_previous_data():
 
 
 # ============================================================
-# CNN 공포탐욕지수
+# CNN 공포탐욕지수 파싱
 # ============================================================
 
 def parse_fng_response(data):
@@ -131,8 +131,14 @@ def parse_fng_response(data):
     return result
 
 
+# ============================================================
+# CNN 공포탐욕지수 조회
+# ============================================================
+
 def fetch_fng():
-    cache_buster = str(int(time.time()))
+    cache_buster = str(
+        int(time.time())
+    )
 
     direct_url = (
         CNN_FNG_URL
@@ -153,44 +159,44 @@ def fetch_fng():
         proxy_url,
     ]
 
-    errors = []
+    error_messages = []
 
     for route_number, url in enumerate(
         urls,
         start=1,
     ):
-        for attempt in range(1, 4):
+        for attempt in range(1, 3):
             try:
-                response_data = get_json(
+                data = get_json(
                     url,
                     timeout=40,
                 )
 
                 return parse_fng_response(
-                    response_data
+                    data
                 )
 
             except Exception as error:
-                errors.append(
+                error_messages.append(
                     "경로 "
                     + str(route_number)
-                    + " / 시도 "
+                    + " 시도 "
                     + str(attempt)
-                    + " / "
+                    + ": "
                     + repr(error)
                 )
 
-                if attempt < 3:
-                    time.sleep(attempt * 3)
+                if attempt < 2:
+                    time.sleep(3)
 
     raise RuntimeError(
-        "CNN 조회 실패: "
-        + " | ".join(errors)
+        "CNN 공포탐욕지수 조회 실패 | "
+        + " | ".join(error_messages)
     )
 
 
 # ============================================================
-# 네이버 금융 VIX와 나스닥100
+# 네이버 금융: VIX 및 나스닥100
 # ============================================================
 
 def fetch_closes(symbol):
@@ -213,14 +219,16 @@ def fetch_closes(symbol):
         if not isinstance(rows, list):
             raise ValueError(
                 symbol
-                + " 응답이 리스트가 아닙니다."
+                + " 응답이 리스트 형식이 아닙니다."
             )
 
         if len(rows) == 0:
             break
 
         for row in rows:
-            close_price = row.get("closePrice")
+            close_price = row.get(
+                "closePrice"
+            )
 
             if close_price is None:
                 continue
@@ -267,23 +275,27 @@ def main():
 
     previous = load_previous_data()
 
-    # --------------------------------------------------------
     # CNN 공포탐욕지수
-    # --------------------------------------------------------
-
     try:
         fng = fetch_fng()
 
     except Exception as error:
-        previous_fng = previous.get("fng")
+        previous_fng = previous.get(
+            "fng"
+        )
 
-        if isinstance(previous_fng, dict):
+        if isinstance(
+            previous_fng,
+            dict,
+        ):
             fng = dict(previous_fng)
             fng["stale"] = True
-            fng["source"] = "직전 CNN 정상값"
+            fng["source"] = (
+                "직전 CNN 정상값"
+            )
 
             errors.append(
-                "공포탐욕지수 최신 조회 실패. "
+                "공포탐욕 최신 조회 실패. "
                 "직전 정상값 사용: "
                 + repr(error)
             )
@@ -292,16 +304,15 @@ def main():
             fng = None
 
             errors.append(
-                "공포탐욕지수 조회 실패: "
+                "공포탐욕 조회 실패: "
                 + repr(error)
             )
 
-    # --------------------------------------------------------
     # VIX
-    # --------------------------------------------------------
-
     try:
-        vix_closes = fetch_closes(".VIX")
+        vix_closes = fetch_closes(
+            ".VIX"
+        )
 
         vix = round(
             vix_closes[-1],
@@ -324,12 +335,11 @@ def main():
                 + repr(error)
             )
 
-    # --------------------------------------------------------
     # 나스닥100
-    # --------------------------------------------------------
-
     try:
-        ndx_closes = fetch_closes(".NDX")
+        ndx_closes = fetch_closes(
+            ".NDX"
+        )
 
         last = ndx_closes[-1]
 
@@ -390,10 +400,7 @@ def main():
                 + repr(error)
             )
 
-    # --------------------------------------------------------
     # data.json 저장
-    # --------------------------------------------------------
-
     now = datetime.now(KST)
 
     output = {
