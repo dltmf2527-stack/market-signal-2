@@ -1,17 +1,13 @@
 import json
 import time
-import urllib.request
 import urllib.parse
-from datetime import datetime, timezone, timedelta
+import urllib.request
+from datetime import datetime, timedelta, timezone
 
-
-# ============================================================
-# 기본 설정
-# ============================================================
 
 KST = timezone(timedelta(hours=9))
 
-CNN_FNG_URL = (
+CNN_URL = (
     "https://production.dataviz.cnn.io/"
     "index/fearandgreed/graphdata"
 )
@@ -19,24 +15,17 @@ CNN_FNG_URL = (
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 Chrome/124.0 Safari/537.36"
     ),
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
     "Referer": "https://edition.cnn.com/",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
 }
 
 
-# ============================================================
-# 공통 JSON 요청
-# ============================================================
-
-def get_json(url, timeout=40):
+def get_json(url, timeout=35):
     request = urllib.request.Request(
-        url=url,
+        url,
         headers=HEADERS,
         method="GET",
     )
@@ -45,19 +34,15 @@ def get_json(url, timeout=40):
         request,
         timeout=timeout,
     ) as response:
-        body = response.read().decode(
+        text = response.read().decode(
             "utf-8",
             errors="replace",
         )
 
-    return json.loads(body)
+    return json.loads(text)
 
 
-# ============================================================
-# 이전 data.json 읽기
-# ============================================================
-
-def load_previous_data():
+def load_previous():
     try:
         with open(
             "data.json",
@@ -70,11 +55,19 @@ def load_previous_data():
         return {}
 
 
-# ============================================================
-# CNN 공포탐욕지수 파싱
-# ============================================================
+def optional_number(data, key):
+    value = data.get(key)
 
-def parse_fng_response(data):
+    if value is None:
+        return None
+
+    return round(
+        float(value),
+        1,
+    )
+
+
+def parse_fng(data):
     fng = data.get("fear_and_greed")
 
     if not isinstance(fng, dict):
@@ -87,7 +80,7 @@ def parse_fng_response(data):
             "CNN 응답에 score가 없습니다."
         )
 
-    result = {
+    return {
         "score": round(
             float(fng["score"]),
             1,
@@ -95,55 +88,39 @@ def parse_fng_response(data):
         "rating": str(
             fng.get("rating", "")
         ),
-        "previousClose": None,
-        "week": None,
-        "month": None,
-        "year": None,
-        "cnnTimestamp": fng.get("timestamp"),
+        "previousClose": optional_number(
+            fng,
+            "previous_close",
+        ),
+        "week": optional_number(
+            fng,
+            "previous_1_week",
+        ),
+        "month": optional_number(
+            fng,
+            "previous_1_month",
+        ),
+        "year": optional_number(
+            fng,
+            "previous_1_year",
+        ),
+        "cnnTimestamp": fng.get(
+            "timestamp"
+        ),
         "source": "CNN Fear & Greed Index",
         "stale": False,
     }
 
-    if fng.get("previous_close") is not None:
-        result["previousClose"] = round(
-            float(fng["previous_close"]),
-            1,
-        )
-
-    if fng.get("previous_1_week") is not None:
-        result["week"] = round(
-            float(fng["previous_1_week"]),
-            1,
-        )
-
-    if fng.get("previous_1_month") is not None:
-        result["month"] = round(
-            float(fng["previous_1_month"]),
-            1,
-        )
-
-    if fng.get("previous_1_year") is not None:
-        result["year"] = round(
-            float(fng["previous_1_year"]),
-            1,
-        )
-
-    return result
-
-
-# ============================================================
-# CNN 공포탐욕지수 조회
-# ============================================================
 
 def fetch_fng():
-    cache_buster = str(
+    timestamp = str(
         int(time.time())
     )
 
     direct_url = (
-        CNN_FNG_URL
+        CNN_URL
         + "?t="
-        + cache_buster
+        + timestamp
     )
 
     proxy_url = (
@@ -159,48 +136,34 @@ def fetch_fng():
         proxy_url,
     ]
 
-    error_messages = []
+    errors = []
 
-    for route_number, url in enumerate(
-        urls,
-        start=1,
-    ):
-        for attempt in range(1, 3):
+    for url in urls:
+        for attempt in range(2):
             try:
                 data = get_json(
                     url,
-                    timeout=40,
+                    timeout=35,
                 )
 
-                return parse_fng_response(
-                    data
-                )
+                return parse_fng(data)
 
             except Exception as error:
-                error_messages.append(
-                    "경로 "
-                    + str(route_number)
-                    + " 시도 "
-                    + str(attempt)
-                    + ": "
-                    + repr(error)
+                errors.append(
+                    repr(error)
                 )
 
-                if attempt < 2:
+                if attempt == 0:
                     time.sleep(3)
 
     raise RuntimeError(
-        "CNN 공포탐욕지수 조회 실패 | "
-        + " | ".join(error_messages)
+        "CNN 조회 실패: "
+        + " | ".join(errors)
     )
 
 
-# ============================================================
-# 네이버 금융: VIX 및 나스닥100
-# ============================================================
-
 def fetch_closes(symbol):
-    closes = []
+    newest_first = []
 
     for page in range(1, 31):
         url = (
@@ -219,84 +182,78 @@ def fetch_closes(symbol):
         if not isinstance(rows, list):
             raise ValueError(
                 symbol
-                + " 응답이 리스트 형식이 아닙니다."
+                + " 응답이 리스트가 아닙니다."
             )
 
-        if len(rows) == 0:
+        if not rows:
             break
 
         for row in rows:
-            close_price = row.get(
+            raw = row.get(
                 "closePrice"
             )
 
-            if close_price is None:
-                continue
-
-            if close_price == "":
+            if raw in (None, ""):
                 continue
 
             try:
                 value = float(
-                    str(close_price).replace(
+                    str(raw).replace(
                         ",",
                         "",
                     )
                 )
 
-                closes.append(value)
+                newest_first.append(
+                    value
+                )
 
             except ValueError:
                 continue
 
-        time.sleep(0.3)
+        time.sleep(0.2)
 
-    if len(closes) < 252:
+    if len(newest_first) < 252:
         raise ValueError(
             symbol
             + " 데이터 부족: "
-            + str(len(closes))
+            + str(len(newest_first))
             + "개"
         )
 
     # 네이버 응답은 최신 날짜부터 과거 날짜 순서입니다.
-    # 계산을 위해 과거부터 최신 날짜 순서로 뒤집습니다.
-    closes.reverse()
+    # 계산을 위해 과거 날짜부터 최신 날짜 순서로 바꿉니다.
+    newest_first.reverse()
 
-    return closes
+    return newest_first
 
-
-# ============================================================
-# 메인 실행
-# ============================================================
 
 def main():
+    previous = load_previous()
     errors = []
-
-    previous = load_previous_data()
 
     # CNN 공포탐욕지수
     try:
         fng = fetch_fng()
 
     except Exception as error:
-        previous_fng = previous.get(
+        old_fng = previous.get(
             "fng"
         )
 
         if isinstance(
-            previous_fng,
+            old_fng,
             dict,
         ):
-            fng = dict(previous_fng)
+            fng = dict(old_fng)
             fng["stale"] = True
             fng["source"] = (
                 "직전 CNN 정상값"
             )
 
             errors.append(
-                "공포탐욕 최신 조회 실패. "
-                "직전 정상값 사용: "
+                "공탐 최신 조회 실패, "
+                "직전값 사용: "
                 + repr(error)
             )
 
@@ -304,53 +261,47 @@ def main():
             fng = None
 
             errors.append(
-                "공포탐욕 조회 실패: "
+                "공탐 조회 실패: "
                 + repr(error)
             )
 
     # VIX
     try:
-        vix_closes = fetch_closes(
+        vix_values = fetch_closes(
             ".VIX"
         )
 
         vix = round(
-            vix_closes[-1],
+            vix_values[-1],
             2,
         )
 
     except Exception as error:
-        vix = previous.get("vix")
+        vix = previous.get(
+            "vix"
+        )
 
-        if vix is not None:
-            errors.append(
-                "VIX 최신 조회 실패. "
-                "직전 정상값 사용: "
-                + repr(error)
-            )
-
-        else:
-            errors.append(
-                "VIX 조회 실패: "
-                + repr(error)
-            )
+        errors.append(
+            "VIX 조회 실패: "
+            + repr(error)
+        )
 
     # 나스닥100
     try:
-        ndx_closes = fetch_closes(
+        ndx_values = fetch_closes(
             ".NDX"
         )
 
-        last = ndx_closes[-1]
+        last = ndx_values[-1]
 
-        last_200 = ndx_closes[-200:]
         ma200 = (
-            sum(last_200)
-            / len(last_200)
+            sum(ndx_values[-200:])
+            / 200
         )
 
-        last_252 = ndx_closes[-252:]
-        high_52w = max(last_252)
+        high_52w = max(
+            ndx_values[-252:]
+        )
 
         ndx = {
             "last": round(
@@ -381,26 +332,21 @@ def main():
                 * 100,
                 2,
             ),
-            "days": len(ndx_closes),
+            "days": len(
+                ndx_values
+            ),
         }
 
     except Exception as error:
-        ndx = previous.get("ndx")
+        ndx = previous.get(
+            "ndx"
+        )
 
-        if ndx is not None:
-            errors.append(
-                "나스닥100 최신 조회 실패. "
-                "직전 정상값 사용: "
-                + repr(error)
-            )
+        errors.append(
+            "나스닥100 조회 실패: "
+            + repr(error)
+        )
 
-        else:
-            errors.append(
-                "나스닥100 조회 실패: "
-                + repr(error)
-            )
-
-    # data.json 저장
     now = datetime.now(KST)
 
     output = {
