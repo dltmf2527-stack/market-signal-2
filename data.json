@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-01T06:47:54+09:00",
-  "updatedLabel": "2026년 10월 01일 06:47 (한국시각)",
+  "updatedAt": "2026-10-01T12:05:04+09:00",
+  "updatedLabel": "2026년 10월 01일 12:05 (한국시각)",
   "fng": {
     "score": 30.8,
     "rating": "fear",
@@ -8,11 +8,11 @@
     "week": 32.5,
     "month": 53.7,
     "year": 51.4,
-    "cnnTimestamp": "2026-09-30T21:30:52+00:00",
+    "cnnTimestamp": "2026-09-30T23:59:50+00:00",
     "source": "CNN Fear & Greed Index",
     "stale": false
   },
-  "vix": 16.04,
+  "vix": 16.34,
   "ndx": {
     "last": 30408.5,
     "ma200": 27423.29,
