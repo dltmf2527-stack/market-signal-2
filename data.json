@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-11-24T14:29:08+09:00",
-  "updatedLabel": "2026년 11월 24일 14:29 (한국시각)",
+  "updatedAt": "2026-11-24T22:04:08+09:00",
+  "updatedLabel": "2026년 11월 24일 22:04 (한국시각)",
   "fng": {
-    "score": 17.0,
+    "score": 15.5,
     "rating": "extreme fear",
     "previousClose": 17.0,
     "week": 26.0,
     "month": 16.7,
     "year": 13.7,
-    "cnnTimestamp": "2026-11-24T01:00:00+00:00",
+    "cnnTimestamp": "2026-11-24T12:42:25+00:00",
     "source": "CNN Fear & Greed Index",
     "stale": false
   },
