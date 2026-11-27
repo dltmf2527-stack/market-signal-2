@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-26T20:41:31+09:00",
-  "updatedLabel": "2026년 11월 26일 20:41 (한국시각)",
+  "updatedAt": "2026-11-27T12:45:05+09:00",
+  "updatedLabel": "2026년 11월 27일 12:45 (한국시각)",
   "fng": {
     "score": 15.0,
     "rating": "extreme fear",
@@ -12,7 +12,7 @@
     "source": "CNN Fear & Greed Index",
     "stale": false
   },
-  "vix": 28.29,
+  "vix": 26.8,
   "ndx": {
     "last": 26046.9,
     "ma200": 28090.98,
