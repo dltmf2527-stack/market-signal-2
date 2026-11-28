@@ -1,24 +1,24 @@
 {
-  "updatedAt": "2026-11-27T20:34:58+09:00",
-  "updatedLabel": "2026년 11월 27일 20:34 (한국시각)",
+  "updatedAt": "2026-11-28T12:28:45+09:00",
+  "updatedLabel": "2026년 11월 28일 12:28 (한국시각)",
   "fng": {
-    "score": 17.9,
+    "score": 24.9,
     "rating": "extreme fear",
     "previousClose": 15.6,
     "week": 18.6,
     "month": 32.9,
     "year": 17.7,
-    "cnnTimestamp": "2026-11-27T11:16:16+00:00",
+    "cnnTimestamp": "2026-11-27T23:59:59+00:00",
     "source": "CNN Fear & Greed Index",
     "stale": false
   },
-  "vix": 26.8,
+  "vix": 23.81,
   "ndx": {
-    "last": 26046.9,
-    "ma200": 28090.98,
+    "last": 26726.39,
+    "ma200": 28098.61,
     "high52w": 31224.69,
-    "drawdown": -16.58,
-    "maGap": -7.28,
+    "drawdown": -14.41,
+    "maGap": -4.88,
     "days": 300
   },
   "errors": []
